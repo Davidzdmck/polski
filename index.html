@@ -43,6 +43,15 @@
       <div id="listening" class="stack"></div>
     </div>
 
+    <div class="panel">
+      <p class="eyebrow">Extra · Freies Üben</p>
+      <p class="small muted">10 Wörter aus deinen Lektionen, so oft du willst. Zählt nicht fürs Wiederholen.</p>
+      <div class="row">
+        <button type="button" id="free-plde">Polnisch → Deutsch</button>
+        <button type="button" id="free-depl">Deutsch → Polnisch schreiben</button>
+      </div>
+    </div>
+
     <details class="panel">
       <summary><b>Alle Lektionen und Spickzettel</b></summary>
       <div id="all-lessons" class="stack"></div>
@@ -54,6 +63,8 @@
       <div class="stack">
         <label for="rate">Sprechtempo der Stimme: <span id="rate-val"></span></label>
         <input type="range" id="rate" min="0.6" max="1.1" step="0.05">
+        <label for="voice">Stimme</label>
+        <select id="voice"></select>
         <div class="row"><button type="button" id="test-voice">Stimme testen</button></div>
         <p class="small muted" id="voice-info"></p>
         <hr>
@@ -70,8 +81,8 @@
       <summary><b>Einrichten auf dem iPhone (einmalig)</b></summary>
       <ol class="small">
         <li>Diese Seite in Safari öffnen, Teilen-Symbol, <b>Zum Home-Bildschirm</b>. Ab dann wie eine App öffnen. So löscht Safari den Fortschritt nicht.</li>
-        <li>Bessere Stimme: Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen › Polnisch › <b>Zosia (Erweitert)</b> laden.</li>
-        <li>Für „Prüfen lassen“: Einstellungen › Allgemein › Tastatur › <b>Diktierfunktion</b> an.</li>
+        <li>Bessere Stimmen: Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen › Polnisch, die Stimmen laden. Danach die App ganz schließen (vom Home-Bildschirm wegwischen) und neu öffnen, dann hier unter Einstellungen auswählen.</li>
+        <li>Für Schreiben und „Prüfen lassen“: Einstellungen › Allgemein › Tastatur › Tastaturen › Tastatur hinzufügen › <b>Polnisch</b>. Dort auch <b>Diktierfunktion</b> an. In der App dann im Textfeld mit 🌐 auf Polnisch wechseln und das Mikrofon der Tastatur antippen.</li>
         <li>Beim ersten Aufnehmen fragt Safari nach dem Mikrofon: erlauben.</li>
       </ol>
     </details>
@@ -137,22 +148,33 @@
     $("rate").value = s.settings.rate; $("rate-val").textContent = s.settings.rate + "×";
   }
 
-  /* ---------- Review session ---------- */
-  let queue = [], total = 0, doneCount = 0, retried = new Set();
+  /* ---------- Sessions: graded review or free practice ---------- */
+  let queue = [], total = 0, doneCount = 0, retried = new Set(), mode = "review";
 
-  function startSession() {
-    queue = shuffle(store.due()).slice(0, 30);
+  function learned() { return Object.keys(store.load().cards).filter((k) => CARDS[k]); }
+  function pool(id) { const l = learned(); return (l.length >= 4 ? l : Object.keys(CARDS)).filter((k) => k !== id); }
+  function choices(id, field) {
+    const seen = new Set([CARDS[id][field]]); const out = [id];
+    for (const k of shuffle(pool(id))) { if (out.length === 4) break; if (!seen.has(CARDS[k][field])) { seen.add(CARDS[k][field]); out.push(k); } }
+    return shuffle(out);
+  }
+
+  function startSession(m) {
+    mode = m;
+    if (m === "review") queue = shuffle(store.due()).slice(0, 30);
+    else { const l = learned(); queue = shuffle(l.length ? l : LESSONS[0].cards).slice(0, 10); }
     total = queue.length; doneCount = 0; retried = new Set();
-    $("home").hidden = true; $("session").hidden = false;
+    $("home").hidden = true; $("session").hidden = false; window.scrollTo(0, 0);
     nextCard();
   }
   function endSession() { $("session").hidden = true; $("home").hidden = false; renderHome(); window.scrollTo(0, 0); }
 
   function finish(id, ok) {
-    store.grade(id, ok);
+    if (mode === "review") store.grade(id, ok);
     if (!ok && !retried.has(id)) { retried.add(id); queue.push(id); total++; }
     doneCount++; nextCard();
   }
+  const nextBtn = (id, ok) => el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: () => finish(id, ok) }, "Weiter"));
 
   function selfGrade(id) {
     return el("div", { class: "row" },
@@ -160,64 +182,114 @@
       el("button", { type: "button", class: "primary", onclick: () => finish(id, true) }, "Wusste ich"));
   }
 
+  /* Multiple choice in either direction. from/to are "pl" or "de". */
+  function exChoose(box, id, from, showText) {
+    const c = CARDS[id]; const to = from === "pl" ? "de" : "pl";
+    const opts = choices(id, to);
+    const fb = el("p", { class: "feedback" });
+    const grid = el("div", { class: "opts" });
+    opts.forEach((o) => grid.append(el("button", { type: "button", class: to === "pl" ? "pl-opt" : null, onclick: (ev) => {
+      if (grid.dataset.done) return; grid.dataset.done = 1;
+      const ok = o === id;
+      ev.currentTarget.classList.add(ok ? "right" : "wrong");
+      grid.children[opts.indexOf(id)].classList.add("right");
+      fb.className = "feedback " + (ok ? "ok" : "no");
+      fb.textContent = c.pl + " = " + c.de;
+      if (to === "pl") say(c.pl);
+      box.append(nextBtn(id, ok));
+    } }, CARDS[o][to])));
+    if (from === "pl") {
+      box.append(el("p", { class: "eyebrow" }, showText ? "Was heißt das?" : "Hören: was heißt das?"),
+        showText ? el("p", { class: "pl" }, stressed(c.syl)) : null,
+        el("div", { class: "row" }, el("button", { type: "button", class: showText ? null : "primary", onclick: () => say(c.pl) }, "▶ Abspielen"),
+          el("button", { type: "button", onclick: () => say(c.pl, 0.6) }, "Langsam")),
+        grid, fb);
+      say(c.pl);
+    } else {
+      box.append(el("p", { class: "eyebrow" }, "Wie heißt das auf Polnisch?"), el("p", { class: "pl" }, c.de), grid, fb);
+    }
+  }
+
+  function exRead(box, id) {
+    const c = CARDS[id];
+    const reveal = el("div", { class: "stack", hidden: "" }, el("p", {}, el("b", {}, c.de)), el("p", { class: "small muted" }, c.hint), selfGrade(id));
+    box.append(el("p", { class: "eyebrow" }, "Laut vorlesen, dann Bedeutung prüfen"),
+      el("p", { class: "pl" }, stressed(c.syl)),
+      practice(c),
+      el("div", { class: "row" }, el("button", { type: "button", onclick: (e) => { reveal.hidden = false; e.currentTarget.remove(); } }, "Bedeutung zeigen")),
+      reveal);
+  }
+
+  function exWrite(box, id) {
+    const c = CARDS[id];
+    const after = el("div", { class: "stack" });
+    const f = PL.answerField(c, { onCheck: (r) => {
+      f.lock(); say(c.pl);
+      after.append(el("p", { class: "pl" }, stressed(c.syl)), el("p", { class: "small muted" }, c.hint));
+      if (r.ok) after.append(nextBtn(id, true));
+      else after.append(el("div", { class: "row" },
+        el("button", { type: "button", onclick: () => finish(id, true) }, "War nur ein Tippfehler"),
+        el("button", { type: "button", class: "primary", onclick: () => finish(id, false) }, "Weiter")));
+    } });
+    box.append(el("p", { class: "eyebrow" }, "Schreib es auf Polnisch"), el("p", { class: "pl" }, c.de),
+      el("p", { class: "small muted" }, "Ohne ą, ł, ż geht auch. Die richtige Schreibweise siehst du danach."),
+      f.node, after);
+    setTimeout(() => f.input.focus(), 50);
+  }
+
+  function exSay(box, id) {
+    const c = CARDS[id];
+    const reveal = el("div", { class: "stack", hidden: "" }, el("p", { class: "pl" }, stressed(c.syl)), practice(c), selfGrade(id));
+    box.append(el("p", { class: "eyebrow" }, "Sag es auf Polnisch, laut"),
+      el("p", { class: "pl" }, c.de),
+      el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: (e) => { reveal.hidden = false; e.currentTarget.remove(); say(c.pl); } }, "Auflösen")),
+      reveal);
+  }
+
   function nextCard() {
     const box = $("card"); box.innerHTML = "";
     $("sess-bar").style.width = total ? (doneCount / total) * 100 + "%" : "0";
     if (!queue.length) {
-      box.append(el("h2", {}, "Fertig für heute."), el("p", {}, doneCount + " Wiederholungen. Weiter mit der Lektion oder dem Hören."),
+      box.append(el("h2", {}, mode === "review" ? "Fertig für heute." : "Runde fertig."),
+        el("p", {}, doneCount + (mode === "review" ? " Wiederholungen. Weiter mit der Lektion oder dem Hören." : " Wörter. Noch eine Runde geht jederzeit.")),
         el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: endSession }, "Zurück")));
       return;
     }
-    const id = queue.shift(); const c = CARDS[id]; if (!c) return nextCard();
-    $("sess-count").textContent = "Noch " + (queue.length + 1);
-    const level = (store.load().cards[id] || { box: 0 }).box;
+    const id = queue.shift(); if (!CARDS[id]) return nextCard();
+    $("sess-count").textContent = (mode === "review" ? "Wiederholen" : "Freies Üben") + " · noch " + (queue.length + 1);
 
-    if (level <= 1) {
-      // Hear it, pick the meaning
-      const pool = shuffle(Object.keys(store.load().cards).filter((k) => k !== id && CARDS[k])).slice(0, 3);
-      const opts = shuffle([id].concat(pool));
-      const fb = el("p", { class: "feedback" });
-      const grid = el("div", { class: "opts" });
-      opts.forEach((o) => grid.append(el("button", { type: "button", onclick: (ev) => {
-        if (grid.dataset.done) return; grid.dataset.done = 1;
-        const ok = o === id;
-        ev.currentTarget.classList.add(ok ? "right" : "wrong");
-        grid.children[opts.indexOf(id)].classList.add("right");
-        fb.className = "feedback " + (ok ? "ok" : "no");
-        fb.textContent = c.pl + " = " + c.de;
-        box.append(el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: () => finish(id, ok) }, "Weiter")));
-      } }, CARDS[o].de)));
-      box.append(el("p", { class: "eyebrow" }, "Hören: was heißt das?"),
-        el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: () => say(c.pl) }, "▶ Abspielen"),
-          el("button", { type: "button", onclick: () => say(c.pl, 0.6) }, "Langsam")),
-        grid, fb);
-      say(c.pl);
-    } else if (level <= 3) {
-      // Read it aloud, then check the meaning
-      const reveal = el("div", { class: "stack", hidden: "" }, el("p", {}, el("b", {}, c.de)), el("p", { class: "small muted" }, c.hint), selfGrade(id));
-      box.append(el("p", { class: "eyebrow" }, "Laut vorlesen, dann Bedeutung prüfen"),
-        el("p", { class: "pl" }, stressed(c.syl)),
-        practice(c),
-        el("div", { class: "row" }, el("button", { type: "button", onclick: (e) => { reveal.hidden = false; e.currentTarget.remove(); } }, "Bedeutung zeigen")),
-        reveal);
-    } else {
-      // German to Polish, out loud
-      const reveal = el("div", { class: "stack", hidden: "" }, el("p", { class: "pl" }, stressed(c.syl)), practice(c), selfGrade(id));
-      box.append(el("p", { class: "eyebrow" }, "Sag es auf Polnisch, laut"),
-        el("p", { class: "pl" }, c.de),
-        el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: (e) => { reveal.hidden = false; e.currentTarget.remove(); say(c.pl); } }, "Auflösen")),
-        reveal);
-    }
+    if (mode === "pl-de") return exChoose(box, id, "pl", true);
+    if (mode === "de-pl") return exWrite(box, id);
+
+    // Graded review: the exercise gets harder as the word climbs the boxes.
+    const card = store.load().cards[id] || { box: 0, seen: 0 };
+    if (card.box === 0) exChoose(box, id, "pl", false);      // hear, pick the German
+    else if (card.box === 1) exChoose(box, id, "de", false); // German, pick the Polish
+    else if (card.box === 2) exRead(box, id);                // read aloud, recall the meaning
+    else if (card.box === 3) exWrite(box, id);               // German, write the Polish
+    else (card.seen % 2 ? exWrite : exSay)(box, id);         // later: alternate writing and speaking
   }
 
-  $("start").onclick = startSession;
+  $("start").onclick = () => startSession("review");
+  $("free-plde").onclick = () => startSession("pl-de");
+  $("free-depl").onclick = () => startSession("de-pl");
   $("quit").onclick = endSession;
 
   /* ---------- Settings ---------- */
   $("rate").oninput = (e) => { const r = Number(e.target.value); store.update((s) => (s.settings.rate = r)); $("rate-val").textContent = r + "×"; };
-  $("test-voice").onclick = () => { say("Dzień dobry, jak się masz?"); setTimeout(() => {
-    $("voice-info").textContent = say.hasVoice() ? "Polnische Stimme gefunden." : "Keine polnische Stimme gefunden. Siehe Einrichten, Punkt 2.";
-  }, 400); };
+  function renderVoices() {
+    const sel = $("voice"); const vs = say.voices(); const cur = say.current();
+    sel.innerHTML = "";
+    if (!vs.length) { sel.append(el("option", {}, "Keine polnische Stimme gefunden")); sel.disabled = true;
+      $("voice-info").textContent = "Siehe Einrichten, Punkt 2."; return; }
+    sel.disabled = false;
+    vs.forEach((v) => sel.append(el("option", { value: v.voiceURI, selected: cur && cur.voiceURI === v.voiceURI }, say.label(v))));
+    $("voice-info").textContent = vs.length + (vs.length === 1 ? " polnische Stimme" : " polnische Stimmen") + " auf diesem Gerät. Neu geladene erscheinen erst nach Neustart der App.";
+  }
+  $("voice").onchange = (e) => { say.setVoice(e.target.value); say("Dzień dobry, jak się masz?"); };
+  $("test-voice").onclick = () => { say("Dzień dobry, jak się masz?"); renderVoices(); };
+  if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", renderVoices);
+  renderVoices();
   $("export").onclick = async () => {
     const code = store.exportCode(); $("code").value = code;
     try { await navigator.clipboard.writeText(code); $("code-msg").textContent = "Kopiert. Jetzt an David schicken."; }

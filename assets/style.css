@@ -132,3 +132,9 @@ textarea { width: 100%; font: inherit; border: 1px solid var(--line); border-rad
   .nav, button, .noprint { display: none !important; }
   .panel { border: 1px solid #ccc; }
 }
+
+/* Answer field: type or dictate */
+input.answer { font: 600 1.15rem/1.2 var(--display); min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; background: var(--surface); color: var(--ink); min-height: 46px; }
+input.answer:focus { outline: 3px solid var(--amber); outline-offset: 1px; }
+.row.nowrap { flex-wrap: nowrap; }
+select { font: inherit; border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--surface); color: var(--ink); width: 100%; min-height: 46px; }.opts button.pl-opt { font-family: var(--display); font-weight: 700; font-size: 1.1rem; }

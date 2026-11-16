@@ -2,8 +2,9 @@
    PL.store    progress in localStorage + Leitner spacing
    PL.say      text-to-speech with the device's Polish voice
    PL.Recorder record yourself, play it back
-   PL.listen   speech recognition (Safari: needs Siri on)
-   PL.practice speaking widget: hear -> record -> compare -> recognize
+   PL.listen   speech recognition (Safari: needs Siri on, often blocked as home-screen app)
+   PL.answerField type or dictate Polish, compare with the card
+   PL.practice speaking widget: hear -> record -> compare -> dictate to check
    PL.quiz     multiple-choice widget with instant feedback */
 (function () {
   const KEY = "pl-progress-v1";
@@ -68,13 +69,28 @@
 
   /* ---------- Speech output ---------- */
   let voice = null;
-  function pickVoice() {
-    if (!("speechSynthesis" in window)) return;
-    const vs = speechSynthesis.getVoices().filter((v) => /^pl/i.test(v.lang));
-    // Prefer enhanced/premium voices when installed.
-    voice = vs.find((v) => /enhanced|premium|erweitert/i.test(v.name)) || vs[0] || null;
+  // iOS often names the compact and the enhanced voice the same ("Zosia"); the quality is in voiceURI.
+  function quality(v) {
+    const s = (v.voiceURI + " " + v.name).toLowerCase();
+    if (/premium/.test(s)) return 3;
+    if (/enhanced|erweitert/.test(s)) return 2;
+    if (/compact|kompakt/.test(s)) return 0;
+    return 1;
   }
-  if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function plVoices() {
+    if (!("speechSynthesis" in window)) return [];
+    return speechSynthesis.getVoices().filter((v) => /^pl/i.test(v.lang)).sort((a, b) => quality(b) - quality(a));
+  }
+  function voiceLabel(v) {
+    const q = ["Kompakt", "", "Erweitert", "Premium"][quality(v)];
+    return v.name + (q && !v.name.toLowerCase().includes(q.toLowerCase()) ? " (" + q + ")" : "");
+  }
+  function pickVoice() {
+    const vs = plVoices();
+    const want = store.load().settings.voice;
+    voice = (want && vs.find((v) => v.voiceURI === want)) || vs[0] || null;
+  }
+  if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.addEventListener("voiceschanged", pickVoice); }
 
   function say(text, rate) {
     return new Promise((resolve) => {
@@ -90,6 +106,10 @@
     });
   }
   say.hasVoice = () => !!voice;
+  say.voices = plVoices;
+  say.label = voiceLabel;
+  say.current = () => voice;
+  say.setVoice = (uri) => { store.update((s) => (s.settings.voice = uri || null)); pickVoice(); };
 
   /* ---------- Recording ---------- */
   class Recorder {
@@ -171,10 +191,73 @@
     return out;
   }
 
-  /* ---------- Speaking widget ----------
-     opts.onResult(score|null) is called after a recognition attempt. */
-  function practice(card, opts) {
+  /* ---------- Answer field: type or dictate Polish, then compare ----------
+     Dictation runs through the iPhone keyboard microphone (Polish keyboard active).
+     That works everywhere, also as home-screen app, where Safari's own speech
+     recognition is often blocked. The 🎤 button tries Safari's recognition and hides
+     itself for good once it has been refused. */
+  const FOLD = { "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n", "ó": "o", "ś": "s", "ź": "z", "ż": "z" };
+  function fold(s) { return norm(s).replace(/[ąćęłńóśźż]/g, (c) => FOLD[c]); }
+  function check(input, target) {
+    if (!norm(input)) return { level: "empty", ok: false };
+    if (norm(input) === norm(target)) return { level: "exact", ok: true };
+    if (fold(input) === fold(target)) return { level: "accents", ok: true };
+    const score = similarity(input, target);
+    return { level: score >= 0.75 ? "close" : "wrong", ok: false, score };
+  }
+  function srError(code) {
+    if (code === "not-allowed" || code === "service-not-allowed") {
+      store.update((s) => (s.settings.srBlocked = true));
+      return "Automatisches Zuhören ist hier gesperrt. Nimm das Mikrofon der Tastatur (siehe Einrichten, Punkt 3).";
+    }
+    if (code === "unsupported") return "Automatisches Zuhören gibt es hier nicht. Nimm das Mikrofon der Tastatur.";
+    return "Automatisches Zuhören hat nicht geklappt (" + code + "). Nimm das Mikrofon der Tastatur.";
+  }
+
+  /* opts.mode "write" (default) or "speak"; opts.onCheck(result, text) after each check. */
+  function answerField(card, opts) {
     opts = opts || {};
+    const speak = opts.mode === "speak";
+    const input = el("input", {
+      type: "text", lang: "pl", class: "answer grow", autocomplete: "off", autocapitalize: "off",
+      autocorrect: "off", spellcheck: "false", enterkeyhint: "done",
+      placeholder: speak ? "Tastatur-Mikrofon antippen, sprechen" : "Auf Polnisch schreiben",
+      "aria-label": "Antwort auf Polnisch",
+    });
+    const fb = el("p", { class: "feedback" });
+    function run() {
+      const r = check(input.value, card.pl);
+      const heard = speak ? "Verstanden: „" + input.value.trim().replace(/[.!?]+$/, "") + "“. " : "";
+      fb.className = "feedback " + (r.ok ? "ok" : r.level === "empty" ? "" : "no");
+      fb.textContent = {
+        empty: speak ? "Erst sprechen: Mikrofon unten rechts auf der Tastatur." : "Erst schreiben.",
+        exact: heard + (speak ? "Sitzt." : "Richtig."),
+        accents: heard + "Richtig, nur die polnischen Zeichen fehlen: " + card.pl,
+        close: heard + "Fast. Richtig ist: " + card.pl,
+        wrong: heard + (speak ? "Noch nicht. Langsam anhören, nachsprechen." : "Richtig ist: " + card.pl),
+      }[r.level];
+      if (r.level !== "empty" && opts.onCheck) opts.onCheck(r, input.value);
+    }
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); run(); } });
+    const btn = el("button", { type: "button", class: "primary", onclick: run }, "Prüfen");
+    let mic = null;
+    if (speak && SR && !store.load().settings.srBlocked) {
+      mic = el("button", { type: "button", "aria-label": "Automatisch zuhören", onclick: async () => {
+        fb.className = "feedback"; fb.textContent = "Ich höre zu …";
+        try {
+          const alts = await listen();
+          if (!alts.length) { fb.textContent = "Nichts verstanden. Nochmal, etwas lauter."; return; }
+          input.value = alts.reduce((m, a) => (similarity(a, card.pl) > similarity(m, card.pl) ? a : m), alts[0]);
+          run();
+        } catch (e) { fb.className = "feedback no"; fb.textContent = srError(e.message); mic.remove(); }
+      } }, "🎤");
+    }
+    const node = el("div", { class: "stack" }, el("div", { class: "row nowrap" }, input, btn, mic), fb);
+    return { node, input, fb, lock() { input.disabled = true; btn.disabled = true; if (mic) mic.disabled = true; } };
+  }
+
+  /* ---------- Speaking widget ---------- */
+  function practice(card) {
     const rec = new Recorder();
     const status = el("p", { class: "feedback small" });
     const btnHear = el("button", { type: "button", onclick: () => say(card.pl) }, "▶ Hören");
@@ -196,31 +279,15 @@
     }, "● Aufnehmen");
     if (!Recorder.supported()) btnRec.setAttribute("disabled", "");
 
-    const btnCheck = el("button", {
-      type: "button",
-      onclick: async () => {
-        status.className = "feedback small"; status.textContent = "Ich höre zu …";
-        try {
-          const alts = await listen();
-          if (!alts.length) { status.textContent = "Nichts verstanden. Nochmal, etwas lauter."; opts.onResult && opts.onResult(null); return; }
-          const best = alts.reduce((m, a) => Math.max(m, similarity(a, card.pl)), 0);
-          const heard = alts[0];
-          if (best >= 0.85) { status.className = "feedback small ok"; status.textContent = "Verstanden: „" + heard + "“. Sitzt."; }
-          else if (best >= 0.6) { status.className = "feedback small"; status.textContent = "Verstanden: „" + heard + "“. Fast. Hör dir das Original nochmal an."; }
-          else { status.className = "feedback small no"; status.textContent = "Verstanden: „" + heard + "“. Noch nicht. Langsam anhören, nachsprechen."; }
-          opts.onResult && opts.onResult(best);
-        } catch (e) {
-          status.textContent = e.message === "not-allowed" ? "Spracherkennung blockiert. Siri und Diktieren in den iPhone-Einstellungen einschalten." : "Spracherkennung nicht verfügbar. Aufnehmen und selbst vergleichen.";
-          opts.onResult && opts.onResult(null);
-        }
-      },
-    }, "✓ Prüfen lassen");
-    if (!listen.supported()) btnCheck.setAttribute("hidden", "");
+    const checkBox = el("div", { class: "stack", hidden: "" },
+      el("p", { class: "small muted" }, "Ins Feld tippen, auf der Tastatur das Mikrofon antippen und das Wort sagen. Versteht das iPhone dich, sitzt die Aussprache."),
+      answerField(card, { mode: "speak" }).node);
+    const btnCheck = el("button", { type: "button", onclick: () => { checkBox.hidden = !checkBox.hidden; if (!checkBox.hidden) checkBox.querySelector("input").focus(); } }, "✓ Prüfen lassen");
 
     return el("div", { class: "stack" },
       el("div", { class: "row" }, btnHear, btnSlow),
       el("div", { class: "row" }, btnRec, btnMine, btnCheck),
-      status);
+      status, checkBox);
   }
 
   /* ---------- Quiz widget ----------
@@ -277,5 +344,5 @@
     return () => clearInterval(t);
   }
 
-  window.PL = { store, say, Recorder, listen, similarity, practice, quiz, el, stressed, trackTime };
+  window.PL = { store, say, Recorder, listen, similarity, check, answerField, practice, quiz, el, stressed, trackTime };
 })();
