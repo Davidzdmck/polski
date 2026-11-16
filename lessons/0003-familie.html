@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lektion 3: Meine Familie</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <nav class="nav"><a href="../index.html">← Heute</a><a href="../reference/woerter.html">Wörterliste</a><a href="../reference/laute.html">Laute</a></nav>
+
+  <header class="stack">
+    <p class="eyebrow">Lektion 3 · ca. 10 Minuten</p>
+    <h1>Meine Familie</h1>
+    <p>Ziel dieser Lektion: ein Familienfoto nehmen und zu jeder Person einen polnischen Satz sagen. Dafür brauchst du zehn Wörter und eine Regel.</p>
+  </header>
+
+  <section class="stack">
+    <h2>Die Regel: mój oder moja</h2>
+    <p>Jedes polnische Nomen ist männlich oder weiblich (oder sächlich, das kommt später). Daran hängt, wie „mein“ heißt.</p>
+    <p><b>Endet das Wort auf -a, ist es fast immer weiblich:</b> <span class="pl-sm">moja mama, moja siostra</span>.</p>
+    <p><b>Endet es auf einen Konsonanten, ist es männlich:</b> <span class="pl-sm">mój brat, mój wujek</span>.</p>
+    <p class="callout">Die Ausnahme, die du sofort brauchst: <span class="pl-sm">tata</span> endet auf -a und ist trotzdem ein Mann. Also <span class="pl-sm">mój tata</span>. Gleiches gilt später für andere Männerwörter auf -a.</p>
+    <p><b>To jest</b> heißt „das ist“ und ändert sich nie: <span class="pl-sm">To jest moja mama. To jest mój brat.</span></p>
+  </section>
+
+  <section class="stack">
+    <h2>Übung A: Abrufen</h2>
+    <p class="small muted">Nicht hochscrollen. Raten ist erlaubt, Nachschauen nicht.</p>
+    <div class="panel" id="quiz"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung B: Die Wörter sprechen</h2>
+    <p>Erst selbst laut lesen. Dann Original anhören, aufnehmen, vergleichen.</p>
+    <div class="panel" id="words"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung C: Raus aus der App</h2>
+    <div class="callout"><p>Nimm ein echtes Familienfoto und sag zu jeder Person laut einen Satz: <span class="pl-sm">To jest moja babcia. To jest mój wujek.</span> Fehlt dir ein Wort (Nichte, Schwager, Stiefvater), schreib es David auf. Das kommt in eine der nächsten Lektionen.</p></div>
+  </section>
+
+  <section class="panel stack">
+    <h2>Fertig?</h2>
+    <p>Mit dem Abschluss kommen die Wörter in dein tägliches Wiederholen.</p>
+    <div class="row"><button type="button" class="primary" id="done">Lektion abschließen</button></div>
+    <p class="feedback ok" id="done-msg"></p>
+  </section>
+
+  <footer>
+    <p><b>Zum Weiterlesen:</b> <a href="https://en.wikivoyage.org/wiki/Polish_phrasebook" target="_blank" rel="noopener">Wikivoyage: Polish phrasebook</a>, Abschnitt Grundlagen.</p>
+    <p>Unklar, warum etwas so ist? Schreib David die Frage. Er klärt sie und baut die Antwort in die nächste Lektion ein.</p>
+  </footer>
+</main>
+
+<script src="../assets/content.js"></script>
+<script src="../assets/core.js"></script>
+<script src="../assets/lesson.js"></script>
+<script>
+(function () {
+  PL.lesson({ id: "0003", quiz: [
+ {
+  "prompt": "___ siostra",
+  "options": [
+   "mój",
+   "moja"
+  ],
+  "answer": 1,
+  "why": "siostra endet auf -a: moja siostra."
+ },
+ {
+  "prompt": "___ brat",
+  "options": [
+   "mój",
+   "moja"
+  ],
+  "answer": 0,
+  "why": "brat endet auf Konsonant: mój brat."
+ },
+ {
+  "prompt": "___ tata",
+  "options": [
+   "moja",
+   "mój"
+  ],
+  "answer": 1,
+  "why": "Die Ausnahme: tata ist ein Mann, also mój tata."
+ },
+ {
+  "prompt": "___ ciocia",
+  "options": [
+   "moja",
+   "mój"
+  ],
+  "answer": 0,
+  "why": "ciocia endet auf -a: moja ciocia."
+ },
+ {
+  "prompt": "___ wujek",
+  "options": [
+   "mój",
+   "moja"
+  ],
+  "answer": 0,
+  "why": "wujek endet auf Konsonant: mój wujek."
+ },
+ {
+  "prompt": "___ rodzina",
+  "options": [
+   "mój",
+   "moja"
+  ],
+  "answer": 1,
+  "why": "rodzina endet auf -a: moja rodzina."
+ },
+ {
+  "prompt": "___ dziadek",
+  "options": [
+   "moja",
+   "mój"
+  ],
+  "answer": 1,
+  "why": "dziadek endet auf Konsonant: mój dziadek."
+ },
+ {
+  "prompt": "Was heißt <i>kuzynka</i>?",
+  "options": [
+   "Tante",
+   "Cousine",
+   "Nichte",
+   "Schwester"
+  ],
+  "answer": 1,
+  "why": "kuzynka ist die Cousine, kuzyn der Cousin.",
+  "audio": "kuzynka"
+ }
+] });
+})();
+</script>
+</body>
+</html>

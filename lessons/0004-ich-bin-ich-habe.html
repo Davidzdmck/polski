@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lektion 4: Ich bin, ich habe</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <nav class="nav"><a href="../index.html">← Heute</a><a href="../reference/woerter.html">Wörterliste</a><a href="../reference/laute.html">Laute</a></nav>
+
+  <header class="stack">
+    <p class="eyebrow">Lektion 4 · ca. 12 Minuten</p>
+    <h1>Ich bin, ich habe</h1>
+    <p>Mit zwei Verben stellst du dich vor: <span class="pl-sm">jestem</span> (ich bin) und <span class="pl-sm">mam</span> (ich habe). Dazu zählen bis zehn.</p>
+  </header>
+
+  <section class="stack">
+    <h2>Kein „ich“ nötig</h2>
+    <p>Polnisch lässt „ich“ und „du“ meistens weg. Die Endung sagt schon, wer gemeint ist: <b>-em / -m</b> heißt ich, <b>-eś / -sz</b> heißt du.</p>
+    <div class="panel">
+      <p><span class="pl-sm">jestem</span> · ich bin &nbsp;&nbsp; <span class="pl-sm">jesteś</span> · du bist</p>
+      <p><span class="pl-sm">mam</span> · ich habe &nbsp;&nbsp; <span class="pl-sm">masz</span> · du hast</p>
+    </div>
+    <p><b>Verneinen:</b> <span class="pl-sm">nie</span> kommt immer direkt vor das Verb. <span class="pl-sm">nie mam</span> = ich habe nicht, <span class="pl-sm">nie jestem</span> = ich bin nicht.</p>
+    <p><b>Wie du heißt</b>, sagst du mit „haben“: <span class="pl-sm">Mam na imię …</span>, wörtlich „ich habe zum Namen“.</p>
+  </section>
+
+  <section class="stack">
+    <h2>1 bis 10</h2>
+    <p class="small muted">Antippen zum Hören. Achte bei 5, 6, 9 und 10 auf das weiche ć am Ende.</p>
+    <div class="sounds" id="nums"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung A: Abrufen</h2>
+    <p class="small muted">Nicht hochscrollen. Raten ist erlaubt, Nachschauen nicht.</p>
+    <div class="panel" id="quiz"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung B: Die Wörter sprechen</h2>
+    <p>Erst selbst laut lesen. Dann Original anhören, aufnehmen, vergleichen.</p>
+    <div class="panel" id="words"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung C: Raus aus der App</h2>
+    <div class="callout"><p>Stell dich laut vor, als würdest du zum ersten Mal Verwandte treffen: <span class="pl-sm">Dzień dobry! Mam na imię … Jestem z Niemiec.</span> Dann zähl die Treppenstufen in deinem Haus auf Polnisch.</p></div>
+  </section>
+
+  <section class="panel stack">
+    <h2>Fertig?</h2>
+    <p>Mit dem Abschluss kommen die Wörter in dein tägliches Wiederholen.</p>
+    <div class="row"><button type="button" class="primary" id="done">Lektion abschließen</button></div>
+    <p class="feedback ok" id="done-msg"></p>
+  </section>
+
+  <footer>
+    <p><b>Zum Weiterlesen:</b> <a href="https://en.wikivoyage.org/wiki/Polish_phrasebook" target="_blank" rel="noopener">Wikivoyage: Polish phrasebook</a>, Abschnitte Grundlagen und Zahlen.</p>
+    <p>Unklar, warum etwas so ist? Schreib David die Frage. Er klärt sie und baut die Antwort in die nächste Lektion ein.</p>
+  </footer>
+</main>
+
+<script src="../assets/content.js"></script>
+<script src="../assets/core.js"></script>
+<script src="../assets/lesson.js"></script>
+<script>
+(function () {
+  PL.soundRows("nums", [["1", "", "jeden", ""], ["2", "", "dwa", ""], ["3", "trz wie tsch", "trzy", ""], ["4", "", "cztery", ""], ["5", "weiches ć", "pięć", ""], ["6", "hart, dann weich", "sześć", ""], ["7", "", "siedem", ""], ["8", "", "osiem", ""], ["9", "", "dziewięć", ""], ["10", "", "dziesięć", ""]]);
+  PL.lesson({ id: "0004", quiz: [
+ {
+  "prompt": "Ich habe",
+  "options": [
+   "jestem",
+   "mam",
+   "masz",
+   "jesteś"
+  ],
+  "answer": 1,
+  "why": "mam = ich habe, masz = du hast."
+ },
+ {
+  "prompt": "Du bist",
+  "options": [
+   "mam",
+   "masz",
+   "jesteś",
+   "jestem"
+  ],
+  "answer": 2,
+  "why": "jesteś: die Endung -eś zeigt du."
+ },
+ {
+  "prompt": "Welche Zahl hörst du?",
+  "options": [
+   "7",
+   "6",
+   "9",
+   "8"
+  ],
+  "answer": 0,
+  "why": "siedem = 7. sześć = 6, osiem = 8.",
+  "audio": "siedem"
+ },
+ {
+  "prompt": "Welche Zahl hörst du?",
+  "options": [
+   "4",
+   "3",
+   "5",
+   "10"
+  ],
+  "answer": 2,
+  "why": "pięć = 5.",
+  "audio": "pięć"
+ },
+ {
+  "prompt": "Ich habe nicht",
+  "options": [
+   "mam nie",
+   "nie mam"
+  ],
+  "answer": 1,
+  "why": "nie steht immer vor dem Verb."
+ },
+ {
+  "prompt": "Welche Zahl hörst du?",
+  "options": [
+   "10",
+   "8",
+   "6",
+   "9"
+  ],
+  "answer": 3,
+  "why": "dziewięć = 9, dziesięć = 10. Hör auf w gegen s in der Mitte.",
+  "audio": "dziewięć"
+ },
+ {
+  "prompt": "Warum fehlt in <i>Jestem z Niemiec</i> das „ich“?",
+  "options": [
+   "Die Endung zeigt die Person",
+   "Polnisch hat kein Wort ich"
+  ],
+  "answer": 0,
+  "why": "Es gibt ja (ich), man braucht es nur zur Betonung."
+ }
+] });
+})();
+</script>
+</body>
+</html>

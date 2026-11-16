@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lektion 1: Die Laute</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <nav class="nav"><a href="../index.html">← Heute</a><a href="../reference/laute.html">Spickzettel</a></nav>
+
+  <header class="stack">
+    <p class="eyebrow">Lektion 1 · ca. 10 Minuten</p>
+    <h1>Die Laute</h1>
+    <p>Polnisch sieht schwer aus und ist beim Lesen eines der einfachsten Systeme Europas: jeder Buchstabe
+      klingt fast immer gleich. Wer die gut 15 Abweichungen vom Deutschen kennt, kann jedes Wort vorlesen.</p>
+    <p class="callout small">Du hast einen Vorsprung. Wer als Kind eine Sprache hatte, behält vor allem bei den Lauten
+      einen Vorteil gegenüber echten Anfängern, auch nach Jahren ohne Kontakt
+      (<a href="https://www.nhlrc.ucla.edu/nhlrc/events/conference/2nd/abstract/135539" target="_blank" rel="noopener">UCLA Heritage Language Center</a>,
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5319333" target="_blank" rel="noopener">Review, PMC</a>).
+      Viele Wörter werden sich beim Hören vertraut anfühlen.</p>
+  </header>
+
+  <section class="stack">
+    <h2>Regel 1: Betonung auf der vorletzten Silbe</h2>
+    <p>Fast immer. <span class="pl-sm">dzia<span class="stress">dek</span></span> ist falsch,
+      <span class="pl-sm"><span class="stress">dzia</span>dek</span> richtig. In dieser App ist die betonte Silbe
+      immer unterstrichen
+      (<a href="https://en.wikibooks.org/wiki/Polish/Polish_pronunciation" target="_blank" rel="noopener">Wikibooks</a>).</p>
+  </section>
+
+  <section class="stack">
+    <h2>Sieht deutsch aus, klingt anders</h2>
+    <p class="small muted">Antippen zum Hören. Die Stimme ist eine iPhone-Stimme, kein Mensch: für die Laute reicht sie.</p>
+    <div class="sounds" id="group-a"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Die Zischlaute</h2>
+    <p>Polnisch hat zwei Reihen: <b>hart</b> (sz, cz, ż) wie im Deutschen und <b>weich</b> (ś, ć, ź) mit der Zunge
+      weiter vorne, fast wie beim ch in „ich“. Vor einem Vokal schreibt man die weichen mit i: <span class="pl-sm">si, ci, zi, ni</span>.
+      Das i wird dann nicht extra gesprochen.</p>
+    <div class="sounds" id="group-b"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Die zwei Nasale</h2>
+    <div class="sounds" id="group-c"></div>
+    <p class="small">Am Wortende wird ę meist zu einem normalen e: <span class="pl-sm">dziękuję</span> endet auf „je“.</p>
+  </section>
+
+  <section class="stack">
+    <h2>Übung A: Regeln abrufen</h2>
+    <p class="small muted">Nicht hochscrollen. Raten ist erlaubt, Nachschauen nicht: genau das Abrufen macht es haltbar.</p>
+    <div class="panel" id="quiz"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung B: 13 Wörter, die du heute noch brauchst</h2>
+    <p>Erst lesen und selbst laut sagen. Dann Original anhören, aufnehmen, vergleichen.
+      „Prüfen lassen“ zeigt, was die Spracherkennung verstanden hat.</p>
+    <div class="panel" id="words"></div>
+  </section>
+
+  <section class="panel stack">
+    <h2>Fertig?</h2>
+    <p>Mit dem Abschluss kommen die 13 Wörter in dein tägliches Wiederholen. Ab morgen fragt die App sie ab,
+      immer dann, wenn du sie fast vergessen hättest.</p>
+    <div class="row"><button type="button" class="primary" id="done">Lektion abschließen</button></div>
+    <p class="feedback ok" id="done-msg"></p>
+  </section>
+
+  <footer>
+    <p><b>Zum Weiterlesen:</b> <a href="https://culture.pl/en/article/how-wajda-sklodowska-and-gombrowicz-can-teach-you-proper-polish-pronunciation" target="_blank" rel="noopener">How Wajda, Skłodowska and Gombrowicz Can Teach You Proper Polish Pronunciation</a>
+      (culture.pl, Adam-Mickiewicz-Institut, Englisch). Die beste kurze Einführung in die Laute.</p>
+    <p>Unklar, warum etwas so klingt? Schreib David die Frage. Er klärt sie und baut die Antwort in die nächste Lektion ein.</p>
+  </footer>
+</main>
+
+<script src="../assets/content.js"></script>
+<script src="../assets/core.js"></script>
+<script src="../assets/lesson.js"></script>
+<script>
+(function () {
+  PL.soundRows("group-a", [
+    ["w", "wie deutsches <b>w</b>", "woda", "Wasser"],
+    ["ł", "wie englisches <b>w</b> in water", "mały", "klein"],
+    ["c", "wie <b>z</b> in Zeit", "noc", "Nacht"],
+    ["z", "weiches <b>s</b> wie in Rose", "zupa", "Suppe"],
+    ["s", "immer scharf wie <b>ß</b>", "sok", "Saft"],
+    ["ó", "wie <b>u</b>, genau wie u", "mój", "mein"],
+    ["y", "dunkles <b>i</b>, wie in Mitte, weiter hinten", "my", "wir"],
+    ["ch", "wie <b>ch</b> in Bach", "chleb", "Brot"],
+    ["j", "wie deutsches <b>j</b>", "jak", "wie"],
+  ]);
+  PL.soundRows("group-b", [
+    ["sz", "wie <b>sch</b>, Lippen nicht runden", "szkoła", "Schule"],
+    ["cz", "wie <b>tsch</b>", "czas", "Zeit"],
+    ["ż rz", "stimmhaftes sch, wie <b>g</b> in Garage. Nach p, t, k wird rz zu sch: przepraszam", "rzeka", "Fluss"],
+    ["ś", "weiches sch, Zunge hinter den Zähnen", "śnieg", "Schnee"],
+    ["ć", "weiches tsch", "ciocia", "Tante"],
+    ["ń", "wie <b>gn</b> in Champagner", "koń", "Pferd"],
+  ]);
+  PL.soundRows("group-c", [
+    ["ę", "nasales e, wie französisch <b>in</b>", "ręka", "Hand"],
+    ["ą", "nasales o, wie französisch <b>on</b>", "są", "sie sind"],
+  ]);
+
+  const Q = [
+    { prompt: "Wie klingt das <b>ł</b> in <i>mały</i>?", audio: "mały", options: ["wie deutsches l", "wie deutsches w", "wie deutsches u", "wie englisches w"], answer: 3, why: "ł ist das englische w: ma-wy." },
+    { prompt: "Wie klingt das <b>w</b> in <i>woda</i>?", audio: "woda", options: ["wie englisches w", "wie deutsches w", "wie deutsches u", "wie deutsches f"], answer: 1, why: "w ist einfach das deutsche w." },
+    { prompt: "Wie klingt das <b>c</b> in <i>noc</i>?", audio: "noc", options: ["wie z in Zeit", "wie k in Kuh", "wie sch in Schuh", "wie tsch in Matsch"], answer: 0, why: "c ist immer ts, wie das deutsche z." },
+    { prompt: "Wie klingt das <b>rz</b> in <i>rzeka</i>?", audio: "rzeka", options: ["wie r in Rose", "wie s in Rose", "wie g in Garage", "wie z in Zeit"], answer: 2, why: "rz klingt wie ż: das g in Garage." },
+    { prompt: "Wo liegt die Betonung in <i>babcia</i>?", audio: "babcia", options: ["BAB-cia", "bab-CIA"], answer: 0, why: "Vorletzte Silbe: BAB-cia. Das i in cia zählt nicht als eigene Silbe." },
+    { prompt: "Wie klingt <b>prz</b> in <i>przepraszam</i>?", audio: "przepraszam", options: ["wie p + r", "wie pr + s", "wie p + z", "wie p + sch"], answer: 3, why: "Nach p wird rz stimmlos: psche-PRA-scham." },
+    { prompt: "Wie klingt das <b>ó</b> in <i>mój</i>?", audio: "mój", options: ["wie o in Rose", "wie ö in schön", "wie u in Mut", "wie a in Mann"], answer: 2, why: "ó und u klingen gleich." },
+    { prompt: "Welche zwei klingen gleich?", options: ["sz und ś", "ż und rz", "cz und ć", "ł und l"], answer: 1, why: "ż und rz sind derselbe Laut, nur anders geschrieben." },
+    { prompt: "Wie klingt das <b>ch</b> in <i>chleb</i>?", audio: "chleb", options: ["wie ch in Bach", "wie k in Kind", "wie sch in Schaf", "wie tsch in Tschüss"], answer: 0, why: "ch ist immer das raue ch aus Bach." },
+  ];
+  PL.lesson({ id: "0001", quiz: Q });
+})();
+</script>
+</body>
+</html>

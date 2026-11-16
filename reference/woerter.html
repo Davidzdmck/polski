@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wörterliste Polnisch</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 8px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.pl-cell { font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+  td.play { width: 52px; text-align: right; }
+  td.play button { min-height: 38px; padding: 6px 12px; }
+  .tbl { overflow-x: auto; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <nav class="nav"><a href="../index.html">← Heute</a><a href="laute.html">Laute</a></nav>
+  <header class="stack">
+    <p class="eyebrow">Spickzettel</p>
+    <h1>Wörterliste</h1>
+    <p>Alle Wörter aus den Lektionen. Die betonte Silbe ist unterstrichen. <b>mój</b> vor männlichen, <b>moja</b> vor weiblichen Wörtern (Endung -a, Ausnahme tata).</p>
+  </header>
+  <div id="list" class="stack"></div>
+</main>
+<script src="../assets/content.js"></script>
+<script src="../assets/core.js"></script>
+<script>
+(function () {
+  const { el, say, stressed } = PL;
+  const box = document.getElementById("list");
+  LESSONS.forEach((l) => {
+    const tb = el("tbody");
+    l.cards.forEach((id) => {
+      const c = CARDS[id];
+      tb.append(el("tr", {},
+        el("td", { class: "pl-cell" }, stressed(c.syl)),
+        el("td", {}, c.de),
+        el("td", { class: "play" }, el("button", { type: "button", "aria-label": c.pl + " anhören", onclick: () => say(c.pl) }, "▶"))));
+    });
+    box.append(el("section", { class: "stack" },
+      el("h2", {}, el("a", { href: "../" + l.href }, "Lektion " + Number(l.id) + ": " + l.title)),
+      el("div", { class: "tbl" }, el("table", {}, tb))));
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lektion 2: Hart und weich</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <nav class="nav"><a href="../index.html">← Heute</a><a href="../reference/woerter.html">Wörterliste</a><a href="../reference/laute.html">Laute</a></nav>
+
+  <header class="stack">
+    <p class="eyebrow">Lektion 2 · ca. 10 Minuten</p>
+    <h1>Hart und weich</h1>
+    <p>Polnisch hat jeden Zischlaut zweimal: hart und weich. Für deutsche Ohren klingen sie fast gleich, für Polen sind es verschiedene Wörter. <span class="pl-sm">proszę</span> heißt bitte, <span class="pl-sm">prosię</span> heißt Ferkel.</p>
+  </header>
+
+  <section class="stack">
+    <h2>So machst du den Unterschied</h2>
+    <p><b>Hart</b> (sz, cz, ż): Zunge nach hinten, Lippen leicht nach vorne. Fast wie das deutsche sch.</p>
+    <p><b>Weich</b> (ś, ć, ź, vor Vokal si, ci, zi): Mundwinkel breit wie beim Lächeln, Zungenrücken hoch zum Gaumen. Trick: sag „ich“ und lass das ch in ein s rutschen.</p>
+    <div class="sounds" id="pairs"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Zwei Regeln für das Wortende</h2>
+    <p><b>Am Wortende wird alles stimmlos.</b> <span class="pl-sm">już</span> klingt wie „jusch“, <span class="pl-sm">też</span> wie „tesch“.</p>
+    <p><b>w nach oder vor einem stimmlosen Laut wird f.</b> <span class="pl-sm">wszystko</span> klingt wie „fschystko“.</p>
+  </section>
+
+  <section class="stack">
+    <h2>Übung A: Abrufen</h2>
+    <p class="small muted">Nicht hochscrollen. Raten ist erlaubt, Nachschauen nicht.</p>
+    <div class="panel" id="quiz"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung B: Die Wörter sprechen</h2>
+    <p>Erst selbst laut lesen. Dann Original anhören, aufnehmen, vergleichen.</p>
+    <div class="panel" id="words"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung C: Raus aus der App</h2>
+    <div class="callout"><p>Sag heute fünfmal am Tag <span class="pl-sm">cieszę się</span>, wenn dich etwas freut. Laut, auch wenn es komisch ist. Weich, hart, weich: das ist der ganze Unterschied dieser Lektion in einem Satz.</p></div>
+  </section>
+
+  <section class="panel stack">
+    <h2>Fertig?</h2>
+    <p>Mit dem Abschluss kommen die Wörter in dein tägliches Wiederholen.</p>
+    <div class="row"><button type="button" class="primary" id="done">Lektion abschließen</button></div>
+    <p class="feedback ok" id="done-msg"></p>
+  </section>
+
+  <footer>
+    <p><b>Zum Weiterlesen:</b> <a href="https://en.wikibooks.org/wiki/Polish/Polish_pronunciation" target="_blank" rel="noopener">Wikibooks: Polish pronunciation</a>, Abschnitt zu den Konsonanten.</p>
+    <p>Unklar, warum etwas so ist? Schreib David die Frage. Er klärt sie und baut die Antwort in die nächste Lektion ein.</p>
+  </footer>
+</main>
+
+<script src="../assets/content.js"></script>
+<script src="../assets/core.js"></script>
+<script src="../assets/lesson.js"></script>
+<script>
+(function () {
+  PL.soundRows("pairs", [["sz", "hart", "kasza", "Grütze"], ["ś si", "weich", "Kasia", "Name"], ["cz", "hart", "czy", "ob"], ["ć ci", "weich", "ci", "dir"], ["ż", "hart, stimmhaft", "żaba", "Frosch"], ["ź zi", "weich, stimmhaft", "zima", "Winter"]]);
+  PL.lesson({ id: "0002", quiz: [
+ {
+  "prompt": "Was hörst du?",
+  "options": [
+   "prosię",
+   "proszę"
+  ],
+  "answer": 1,
+  "why": "proszę mit hartem sz heißt bitte. prosię mit weichem si heißt Ferkel.",
+  "audio": "proszę"
+ },
+ {
+  "prompt": "Was hörst du?",
+  "options": [
+   "Kasia",
+   "kasza"
+  ],
+  "answer": 0,
+  "why": "Kasia ist ein Name, kasza heißt Grütze.",
+  "audio": "Kasia"
+ },
+ {
+  "prompt": "Was hörst du?",
+  "options": [
+   "ci",
+   "czy"
+  ],
+  "answer": 1,
+  "why": "czy ist das Fragewort ob, ci heißt dir.",
+  "audio": "czy"
+ },
+ {
+  "prompt": "Was hörst du?",
+  "options": [
+   "cieszę",
+   "czeszę"
+  ],
+  "answer": 0,
+  "why": "cieszę się heißt ich freue mich, czeszę heißt ich kämme.",
+  "audio": "cieszę"
+ },
+ {
+  "prompt": "Wie klingt das <b>w</b> in <i>wszystko</i>?",
+  "options": [
+   "wie w",
+   "wie f"
+  ],
+  "answer": 1,
+  "why": "Vor dem stimmlosen sz wird w zu f.",
+  "audio": "wszystko"
+ },
+ {
+  "prompt": "Welche Reihe ist weich?",
+  "options": [
+   "ś, ć, ź",
+   "sz, cz, ż"
+  ],
+  "answer": 0,
+  "why": "Die Striche oben machen weich, genau wie ein i danach."
+ }
+] });
+})();
+</script>
+</body>
+</html>

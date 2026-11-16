@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lektion 5: Fragen stellen</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main class="wrap">
+  <nav class="nav"><a href="../index.html">← Heute</a><a href="../reference/woerter.html">Wörterliste</a><a href="../reference/laute.html">Laute</a></nav>
+
+  <header class="stack">
+    <p class="eyebrow">Lektion 5 · ca. 10 Minuten</p>
+    <h1>Fragen stellen</h1>
+    <p>Der häufigste Moment, in dem man ins Deutsche wechselt: man versteht etwas nicht. Diese Lektion gibt dir die Sätze, mit denen du auf Polnisch bleibst, und die Fragewörter, mit denen du selbst fragst.</p>
+  </header>
+
+  <section class="stack">
+    <h2>Drei Rettungssätze</h2>
+    <p>Lern diese drei zuerst. Mit ihnen hältst du jedes Gespräch auf Polnisch, auch wenn du wenig verstehst.</p>
+    <div class="panel">
+      <p><span class="pl-sm">Nie rozumiem.</span> · Ich verstehe nicht.</p>
+      <p><span class="pl-sm">Możesz powtórzyć?</span> · Kannst du das wiederholen?</p>
+      <p><span class="pl-sm">Wolniej, proszę.</span> · Langsamer, bitte.</p>
+    </div>
+    <p class="small muted">możesz ist die du-Form. In der Familie passt das immer.</p>
+  </section>
+
+  <section class="stack">
+    <h2>Sechs Fragewörter</h2>
+    <p>Sie stehen am Satzanfang, die Wortstellung danach bleibt wie im Aussagesatz: <span class="pl-sm">Gdzie jest mama?</span> Wo ist Mama?</p>
+    <div class="sounds" id="qw"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung A: Abrufen</h2>
+    <p class="small muted">Nicht hochscrollen. Raten ist erlaubt, Nachschauen nicht.</p>
+    <div class="panel" id="quiz"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung B: Die Wörter sprechen</h2>
+    <p>Erst selbst laut lesen. Dann Original anhören, aufnehmen, vergleichen.</p>
+    <div class="panel" id="words"></div>
+  </section>
+
+  <section class="stack">
+    <h2>Übung C: Raus aus der App</h2>
+    <div class="callout"><p>Neue Regel für jedes Gespräch mit der Familie: <b>bevor du ins Deutsche wechselst, kommen erst die drei Rettungssätze.</b> Sag deiner Familie vorher Bescheid, dass du das übst. Dann sprechen sie meistens von selbst langsamer.</p></div>
+  </section>
+
+  <section class="panel stack">
+    <h2>Fertig?</h2>
+    <p>Mit dem Abschluss kommen die Wörter in dein tägliches Wiederholen.</p>
+    <div class="row"><button type="button" class="primary" id="done">Lektion abschließen</button></div>
+    <p class="feedback ok" id="done-msg"></p>
+  </section>
+
+  <footer>
+    <p><b>Zum Weiterlesen:</b> <a href="https://en.wikivoyage.org/wiki/Polish_phrasebook" target="_blank" rel="noopener">Wikivoyage: Polish phrasebook</a>, Abschnitte Grundlagen und Probleme.</p>
+    <p>Unklar, warum etwas so ist? Schreib David die Frage. Er klärt sie und baut die Antwort in die nächste Lektion ein.</p>
+  </footer>
+</main>
+
+<script src="../assets/content.js"></script>
+<script src="../assets/core.js"></script>
+<script src="../assets/lesson.js"></script>
+<script>
+(function () {
+  PL.soundRows("qw", [["co", "was", "co", ""], ["kto", "wer", "kto", ""], ["gdzie", "wo", "gdzie", ""], ["kiedy", "wann", "kiedy", ""], ["ile", "wie viel", "ile", ""], ["dla­czego", "warum", "dlaczego", ""]]);
+  PL.lesson({ id: "0005", quiz: [
+ {
+  "prompt": "Was heißt <i>gdzie</i>?",
+  "options": [
+   "wo",
+   "wer",
+   "was",
+   "wie"
+  ],
+  "answer": 0,
+  "why": "gdzie = wo.",
+  "audio": "gdzie"
+ },
+ {
+  "prompt": "Was heißt <i>kiedy</i>?",
+  "options": [
+   "wer",
+   "wann",
+   "warum",
+   "wie viel"
+  ],
+  "answer": 1,
+  "why": "kiedy = wann.",
+  "audio": "kiedy"
+ },
+ {
+  "prompt": "Was heißt <i>ile</i>?",
+  "options": [
+   "was",
+   "wo",
+   "wie viel",
+   "wer"
+  ],
+  "answer": 2,
+  "why": "ile = wie viel. Ile masz lat? Wie viele Jahre hast du?",
+  "audio": "ile"
+ },
+ {
+  "prompt": "Was heißt <i>dlaczego</i>?",
+  "options": [
+   "wann",
+   "wo",
+   "was",
+   "warum"
+  ],
+  "answer": 3,
+  "why": "dlaczego = warum.",
+  "audio": "dlaczego"
+ },
+ {
+  "prompt": "Was heißt <i>kto</i>?",
+  "options": [
+   "wer",
+   "wo",
+   "wie",
+   "wann"
+  ],
+  "answer": 0,
+  "why": "kto = wer.",
+  "audio": "kto"
+ },
+ {
+  "prompt": "Oma redet zu schnell. Was sagst du?",
+  "options": [
+   "Co słychać?",
+   "Wolniej, proszę.",
+   "Ile masz lat?",
+   "Dziękuję."
+  ],
+  "answer": 1,
+  "why": "Wolniej, proszę: langsamer, bitte."
+ },
+ {
+  "prompt": "Du hast einen Satz nicht verstanden.",
+  "options": [
+   "Co to jest?",
+   "Nie mam.",
+   "Nie rozumiem.",
+   "Jestem z Niemiec."
+  ],
+  "answer": 2,
+  "why": "Nie rozumiem, und gleich danach: Możesz powtórzyć?"
+ }
+] });
+})();
+</script>
+</body>
+</html>

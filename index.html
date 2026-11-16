@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Polski">
+<meta name="theme-color" content="#f3f5f7">
+<title>Polski na co dzień</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap">
+
+  <header class="stack">
+    <p class="eyebrow" id="date"></p>
+    <h1>Dzień dobry.</h1>
+    <div class="stats">
+      <div class="stat"><b id="s-streak">0</b><span>Tage am Stück</span></div>
+      <div class="stat"><b id="s-min">0</b><span>Minuten heute</span></div>
+      <div class="stat"><b id="s-words">0</b><span>Wörter im Training</span></div>
+    </div>
+    <div class="meter" title="Tagesziel 20 Minuten"><i id="s-bar"></i></div>
+  </header>
+
+  <!-- Home: the three blocks of a day -->
+  <section id="home" class="stack">
+    <h2>Heute, etwa 25 Minuten</h2>
+
+    <div class="panel">
+      <p class="eyebrow">1 · Wiederholen · ca. 10 Min</p>
+      <p id="due-text"></p>
+      <div class="row"><button type="button" class="primary" id="start">Wiederholen starten</button></div>
+    </div>
+
+    <div class="panel">
+      <p class="eyebrow">2 · Neue Lektion · ca. 10 Min</p>
+      <div id="next-lesson" class="stack"></div>
+    </div>
+
+    <div class="panel">
+      <p class="eyebrow">3 · Hören · ca. 5 bis 10 Min</p>
+      <div id="listening" class="stack"></div>
+    </div>
+
+    <details class="panel">
+      <summary><b>Alle Lektionen und Spickzettel</b></summary>
+      <div id="all-lessons" class="stack"></div>
+      <p><a href="reference/laute.html">Spickzettel: Die Laute</a> · <a href="reference/woerter.html">Wörterliste</a></p>
+    </details>
+
+    <details class="panel">
+      <summary><b>Einstellungen und Fortschritt sichern</b></summary>
+      <div class="stack">
+        <label for="rate">Sprechtempo der Stimme: <span id="rate-val"></span></label>
+        <input type="range" id="rate" min="0.6" max="1.1" step="0.05">
+        <div class="row"><button type="button" id="test-voice">Stimme testen</button></div>
+        <p class="small muted" id="voice-info"></p>
+        <hr>
+        <p class="small">Fortschritt liegt nur auf diesem Gerät. Einmal pro Woche den Code kopieren und David schicken:
+          als Sicherung und damit die nächste Lektion zu dir passt.</p>
+        <div class="row"><button type="button" id="export">Fortschrittscode kopieren</button></div>
+        <textarea id="code" aria-label="Fortschrittscode" placeholder="Code hier einfügen, um Fortschritt wiederherzustellen"></textarea>
+        <div class="row"><button type="button" id="import">Code einspielen</button></div>
+        <p class="small feedback" id="code-msg"></p>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary><b>Einrichten auf dem iPhone (einmalig)</b></summary>
+      <ol class="small">
+        <li>Diese Seite in Safari öffnen, Teilen-Symbol, <b>Zum Home-Bildschirm</b>. Ab dann wie eine App öffnen. So löscht Safari den Fortschritt nicht.</li>
+        <li>Bessere Stimme: Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen › Polnisch › <b>Zosia (Erweitert)</b> laden.</li>
+        <li>Für „Prüfen lassen“: Einstellungen › Allgemein › Tastatur › <b>Diktierfunktion</b> an.</li>
+        <li>Beim ersten Aufnehmen fragt Safari nach dem Mikrofon: erlauben.</li>
+      </ol>
+    </details>
+  </section>
+
+  <!-- Review session -->
+  <section id="session" class="stack" hidden>
+    <div class="row"><p class="eyebrow grow" id="sess-count"></p><button type="button" id="quit">Beenden</button></div>
+    <div class="meter"><i id="sess-bar"></i></div>
+    <div class="panel" id="card"></div>
+  </section>
+
+  <footer>
+    <p>Fragen, Wörter die du unbedingt lernen willst, Dinge die nerven: schreib sie David. Er baut die nächste Lektion daraus.</p>
+  </footer>
+</main>
+
+<script src="assets/content.js"></script>
+<script src="assets/core.js"></script>
+<script>
+(function () {
+  const { store, say, el, practice, stressed } = PL;
+  const $ = (id) => document.getElementById(id);
+  PL.trackTime();
+
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function renderHome() {
+    const s = store.load();
+    const d = new Date();
+    $("date").textContent = d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" });
+    const t = s.days[store.today()] || { seconds: 0 };
+    const min = Math.floor(t.seconds / 60);
+    $("s-min").textContent = min;
+    $("s-bar").style.width = Math.min(100, (min / 20) * 100) + "%";
+    $("s-streak").textContent = store.streak();
+    $("s-words").textContent = Object.keys(s.cards).length;
+
+    const due = store.due();
+    $("due-text").textContent = due.length
+      ? due.length + (due.length === 1 ? " Wort ist" : " Wörter sind") + " heute dran."
+      : Object.keys(s.cards).length ? "Heute nichts fällig. Gut so: weiter mit der Lektion." : "Noch keine Wörter. Fang mit Lektion 1 an.";
+    $("start").disabled = !due.length;
+
+    const next = LESSONS.find((l) => !s.lessons[l.id]);
+    const nl = $("next-lesson"); nl.innerHTML = "";
+    if (next) {
+      nl.append(el("h3", {}, "Lektion " + Number(next.id) + ": " + next.title),
+        el("p", { class: "muted small" }, next.goal),
+        el("div", { class: "row" }, el("a", { class: "btn primary", href: next.href }, "Lektion öffnen")));
+    } else {
+      nl.append(el("p", {}, "Alle Lektionen erledigt. Die nächste baut David gerade. Bis dahin: Wiederholen und Hören reichen."));
+    }
+
+    const li = $("listening"); li.innerHTML = "";
+    LISTENING.forEach((x) => li.append(el("p", {}, el("a", { href: x.url, target: "_blank", rel: "noopener" }, x.title), el("br"), el("span", { class: "small muted" }, x.note))));
+
+    const all = $("all-lessons"); all.innerHTML = "";
+    LESSONS.forEach((l) => all.append(el("p", {},
+      el("a", { href: l.href }, Number(l.id) + ". " + l.title),
+      el("span", { class: "small muted" }, s.lessons[l.id] ? "  · erledigt" : ""))));
+
+    $("rate").value = s.settings.rate; $("rate-val").textContent = s.settings.rate + "×";
+  }
+
+  /* ---------- Review session ---------- */
+  let queue = [], total = 0, doneCount = 0, retried = new Set();
+
+  function startSession() {
+    queue = shuffle(store.due()).slice(0, 30);
+    total = queue.length; doneCount = 0; retried = new Set();
+    $("home").hidden = true; $("session").hidden = false;
+    nextCard();
+  }
+  function endSession() { $("session").hidden = true; $("home").hidden = false; renderHome(); window.scrollTo(0, 0); }
+
+  function finish(id, ok) {
+    store.grade(id, ok);
+    if (!ok && !retried.has(id)) { retried.add(id); queue.push(id); total++; }
+    doneCount++; nextCard();
+  }
+
+  function selfGrade(id) {
+    return el("div", { class: "row" },
+      el("button", { type: "button", onclick: () => finish(id, false) }, "Nochmal"),
+      el("button", { type: "button", class: "primary", onclick: () => finish(id, true) }, "Wusste ich"));
+  }
+
+  function nextCard() {
+    const box = $("card"); box.innerHTML = "";
+    $("sess-bar").style.width = total ? (doneCount / total) * 100 + "%" : "0";
+    if (!queue.length) {
+      box.append(el("h2", {}, "Fertig für heute."), el("p", {}, doneCount + " Wiederholungen. Weiter mit der Lektion oder dem Hören."),
+        el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: endSession }, "Zurück")));
+      return;
+    }
+    const id = queue.shift(); const c = CARDS[id]; if (!c) return nextCard();
+    $("sess-count").textContent = "Noch " + (queue.length + 1);
+    const level = (store.load().cards[id] || { box: 0 }).box;
+
+    if (level <= 1) {
+      // Hear it, pick the meaning
+      const pool = shuffle(Object.keys(store.load().cards).filter((k) => k !== id && CARDS[k])).slice(0, 3);
+      const opts = shuffle([id].concat(pool));
+      const fb = el("p", { class: "feedback" });
+      const grid = el("div", { class: "opts" });
+      opts.forEach((o) => grid.append(el("button", { type: "button", onclick: (ev) => {
+        if (grid.dataset.done) return; grid.dataset.done = 1;
+        const ok = o === id;
+        ev.currentTarget.classList.add(ok ? "right" : "wrong");
+        grid.children[opts.indexOf(id)].classList.add("right");
+        fb.className = "feedback " + (ok ? "ok" : "no");
+        fb.textContent = c.pl + " = " + c.de;
+        box.append(el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: () => finish(id, ok) }, "Weiter")));
+      } }, CARDS[o].de)));
+      box.append(el("p", { class: "eyebrow" }, "Hören: was heißt das?"),
+        el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: () => say(c.pl) }, "▶ Abspielen"),
+          el("button", { type: "button", onclick: () => say(c.pl, 0.6) }, "Langsam")),
+        grid, fb);
+      say(c.pl);
+    } else if (level <= 3) {
+      // Read it aloud, then check the meaning
+      const reveal = el("div", { class: "stack", hidden: "" }, el("p", {}, el("b", {}, c.de)), el("p", { class: "small muted" }, c.hint), selfGrade(id));
+      box.append(el("p", { class: "eyebrow" }, "Laut vorlesen, dann Bedeutung prüfen"),
+        el("p", { class: "pl" }, stressed(c.syl)),
+        practice(c),
+        el("div", { class: "row" }, el("button", { type: "button", onclick: (e) => { reveal.hidden = false; e.currentTarget.remove(); } }, "Bedeutung zeigen")),
+        reveal);
+    } else {
+      // German to Polish, out loud
+      const reveal = el("div", { class: "stack", hidden: "" }, el("p", { class: "pl" }, stressed(c.syl)), practice(c), selfGrade(id));
+      box.append(el("p", { class: "eyebrow" }, "Sag es auf Polnisch, laut"),
+        el("p", { class: "pl" }, c.de),
+        el("div", { class: "row" }, el("button", { type: "button", class: "primary", onclick: (e) => { reveal.hidden = false; e.currentTarget.remove(); say(c.pl); } }, "Auflösen")),
+        reveal);
+    }
+  }
+
+  $("start").onclick = startSession;
+  $("quit").onclick = endSession;
+
+  /* ---------- Settings ---------- */
+  $("rate").oninput = (e) => { const r = Number(e.target.value); store.update((s) => (s.settings.rate = r)); $("rate-val").textContent = r + "×"; };
+  $("test-voice").onclick = () => { say("Dzień dobry, jak się masz?"); setTimeout(() => {
+    $("voice-info").textContent = say.hasVoice() ? "Polnische Stimme gefunden." : "Keine polnische Stimme gefunden. Siehe Einrichten, Punkt 2.";
+  }, 400); };
+  $("export").onclick = async () => {
+    const code = store.exportCode(); $("code").value = code;
+    try { await navigator.clipboard.writeText(code); $("code-msg").textContent = "Kopiert. Jetzt an David schicken."; }
+    catch (e) { $("code").select(); $("code-msg").textContent = "Code steht im Feld, bitte selbst kopieren."; }
+  };
+  $("import").onclick = () => {
+    try { store.importCode($("code").value); $("code-msg").textContent = "Fortschritt wiederhergestellt."; renderHome(); }
+    catch (e) { $("code-msg").textContent = "Der Code passt nicht. Vollständig eingefügt?"; }
+  };
+
+  renderHome();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && !$("home").hidden) renderHome(); });
+})();
+</script>
+</body>
+</html>
