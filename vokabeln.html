@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Polski">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icon-180.png">
+<title>Vokabeltrainer</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--line); padding: 4px; border-radius: 999px; }
+  .tabs button { border: 0; background: transparent; min-height: 40px; }
+  .tabs button[aria-selected="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .flash { perspective: 1200px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .flash-in { position: relative; min-height: 260px; transition: transform .45s; transform-style: preserve-3d; }
+  .flash.flipped .flash-in { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px;
+    display: grid; align-content: center; justify-items: center; gap: 12px; text-align: center; }
+  .face.back { transform: rotateY(180deg); border-color: var(--amber); }
+  .face .tap { position: absolute; bottom: 12px; font-size: .8rem; color: var(--muted); }
+  .face .side { position: absolute; top: 14px; left: 18px; }
+
+  .list table { width: 100%; border-collapse: collapse; }
+  .list td { padding: 8px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .list td.pl-cell { font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+  .list td.play { width: 52px; text-align: right; }
+  .list td.play button { min-height: 38px; padding: 6px 12px; }
+  input.search { width: 100%; font: inherit; border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; background: var(--surface); color: var(--ink); min-height: 46px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <nav class="nav"><a href="index.html">← Heute</a><a href="reference/laute.html">Laute</a></nav>
+
+  <header class="stack">
+    <p class="eyebrow">Vokabeltrainer</p>
+    <h1>Słówka</h1>
+    <p class="muted small">Karteikarten zum Durchblättern, so oft du willst. Zählt nicht fürs tägliche Wiederholen.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="tab-cards" aria-selected="true">Karten</button>
+    <button type="button" role="tab" id="tab-list" aria-selected="false">Liste</button>
+  </div>
+
+  <section id="cards" class="stack">
+    <div class="controls">
+      <select id="lesson" aria-label="Welche Wörter"></select>
+      <select id="dir" aria-label="Richtung">
+        <option value="pl">Polnisch zuerst</option>
+        <option value="de">Deutsch zuerst</option>
+      </select>
+    </div>
+    <div class="meter"><i id="bar"></i></div>
+    <p class="eyebrow" id="count"></p>
+    <div class="flash" id="flash" role="button" tabindex="0" aria-label="Karte umdrehen">
+      <div class="flash-in">
+        <div class="face front" id="front"></div>
+        <div class="face back" id="back"></div>
+      </div>
+    </div>
+    <div class="row" id="grade">
+      <button type="button" class="grow" id="again">Nochmal</button>
+      <button type="button" class="grow primary" id="know">Kann ich</button>
+    </div>
+    <div class="stack" id="end" hidden>
+      <h2>Alle gewusst.</h2>
+      <p id="end-msg"></p>
+      <div class="row"><button type="button" class="primary" id="restart">Nochmal mischen</button></div>
+    </div>
+  </section>
+
+  <section id="list" class="stack list" hidden>
+    <input class="search" id="q" type="search" placeholder="Suchen, polnisch oder deutsch" aria-label="Wörter suchen" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <div id="list-body" class="stack"></div>
+  </section>
+</main>
+
+<script src="assets/content.js"></script>
+<script src="assets/core.js"></script>
+<script>
+(function () {
+  const { el, say, stressed, store } = PL;
+  const $ = (id) => document.getElementById(id);
+  PL.trackTime();
+  const KEY = "pl-vocab-ui";
+  let ui = { lesson: "learned", dir: "pl", tab: "cards" };
+  try { Object.assign(ui, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
+  const saveUi = () => { try { localStorage.setItem(KEY, JSON.stringify(ui)); } catch (e) {} };
+
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  const allIds = () => LESSONS.flatMap((l) => l.cards).filter((k) => CARDS[k]);
+  const learnedIds = () => allIds().filter((k) => store.load().cards[k]);
+
+  /* ---------- Tabs ---------- */
+  function setTab(t) {
+    ui.tab = t; saveUi();
+    $("tab-cards").setAttribute("aria-selected", t === "cards");
+    $("tab-list").setAttribute("aria-selected", t === "list");
+    $("cards").hidden = t !== "cards"; $("list").hidden = t !== "list";
+  }
+  $("tab-cards").onclick = () => setTab("cards");
+  $("tab-list").onclick = () => setTab("list");
+
+  /* ---------- Cards ---------- */
+  const sel = $("lesson");
+  const nLearned = learnedIds().length;
+  if (nLearned) sel.append(el("option", { value: "learned" }, "Meine Wörter (" + nLearned + ")"));
+  sel.append(el("option", { value: "all" }, "Alle Wörter (" + allIds().length + ")"));
+  LESSONS.forEach((l) => sel.append(el("option", { value: l.id }, "Lektion " + Number(l.id) + ": " + l.title)));
+  if (![...sel.options].some((o) => o.value === ui.lesson)) ui.lesson = nLearned ? "learned" : "0001";
+  sel.value = ui.lesson; $("dir").value = ui.dir;
+
+  let deck = [], total = 0, known = 0, rounds = 0, cur = null;
+
+  function ids() {
+    if (ui.lesson === "learned") return learnedIds();
+    if (ui.lesson === "all") return allIds();
+    return (LESSONS.find((l) => l.id === ui.lesson) || LESSONS[0]).cards.filter((k) => CARDS[k]);
+  }
+  function start() {
+    deck = shuffle(ids()); total = deck.length; known = 0; rounds = 0;
+    $("end").hidden = true; $("flash").hidden = false; $("grade").hidden = false;
+    show();
+  }
+  function face(c, side) {
+    const play = (rate) => el("button", { type: "button", onclick: (e) => { e.stopPropagation(); say(c.pl, rate); } }, rate ? "Langsam" : "▶ Hören");
+    if (side === "pl") return [el("p", { class: "eyebrow side" }, "Polnisch"), el("p", { class: "pl" }, stressed(c.syl)),
+      el("div", { class: "row" }, play(), play(0.6))];
+    return [el("p", { class: "eyebrow side" }, "Deutsch"), el("p", { class: "pl" }, c.de)];
+  }
+  function show() {
+    $("bar").style.width = total ? (known / total) * 100 + "%" : "0";
+    if (!deck.length) {
+      $("flash").hidden = true; $("grade").hidden = true; $("end").hidden = false;
+      $("count").textContent = total + " von " + total;
+      $("end-msg").textContent = total + " Wörter" + (rounds ? ", " + rounds + "× musste eins nochmal kommen." : ", alle beim ersten Mal.");
+      return;
+    }
+    cur = deck[0]; const c = CARDS[cur];
+    $("count").textContent = known + " von " + total + " gewusst · noch " + deck.length;
+    const fl = $("flash"); fl.classList.remove("flipped");
+    const other = ui.dir === "pl" ? "de" : "pl";
+    $("front").replaceChildren(...face(c, ui.dir), el("span", { class: "tap" }, "Antippen zum Umdrehen"));
+    $("back").replaceChildren(...face(c, other), el("p", { class: "small muted" }, c.hint));
+    if (ui.dir === "pl") say(c.pl);
+  }
+  function flip() {
+    const fl = $("flash"); fl.classList.toggle("flipped");
+    if (fl.classList.contains("flipped") && ui.dir === "de") say(CARDS[cur].pl);
+  }
+  $("flash").onclick = flip;
+  $("flash").onkeydown = (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); } };
+  $("know").onclick = () => { deck.shift(); known++; show(); };
+  $("again").onclick = () => {
+    // Put it back a few cards later, not at the very end.
+    const id = deck.shift(); rounds++;
+    deck.splice(Math.min(deck.length, 3 + Math.floor(Math.random() * 3)), 0, id); show();
+  };
+  $("restart").onclick = start;
+  sel.onchange = () => { ui.lesson = sel.value; saveUi(); start(); };
+  $("dir").onchange = (e) => { ui.dir = e.target.value; saveUi(); start(); };
+
+  /* ---------- List ---------- */
+  const fold = (s) => s.toLowerCase().replace(/[ąćęłńóśźż]/g, (ch) => ({ "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n", "ó": "o", "ś": "s", "ź": "z", "ż": "z" }[ch]));
+  function renderList() {
+    const q = fold($("q").value.trim());
+    const body = $("list-body"); body.innerHTML = "";
+    let hits = 0;
+    LESSONS.forEach((l) => {
+      const tb = el("tbody");
+      l.cards.forEach((id) => {
+        const c = CARDS[id]; if (!c) return;
+        if (q && !fold(c.pl).includes(q) && !fold(c.de).includes(q)) return;
+        hits++;
+        tb.append(el("tr", {},
+          el("td", { class: "pl-cell" }, stressed(c.syl)),
+          el("td", {}, c.de, el("br"), el("span", { class: "small muted" }, c.hint)),
+          el("td", { class: "play" }, el("button", { type: "button", "aria-label": c.pl + " anhören", onclick: () => say(c.pl) }, "▶"))));
+      });
+      if (tb.children.length) body.append(el("section", { class: "stack" },
+        el("h2", {}, el("a", { href: l.href }, "Lektion " + Number(l.id) + ": " + l.title)), el("table", {}, tb)));
+    });
+    if (!hits) body.append(el("p", { class: "muted" }, "Nichts gefunden. Schreib David, welches Wort fehlt."));
+  }
+  $("q").oninput = renderList;
+
+  setTab(ui.tab);
+  renderList();
+  start();
+})();
+</script>
+</body>
+</html>
